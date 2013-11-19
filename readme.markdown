@@ -1,3 +1,18 @@
+# Make it avaliable for PHP 5.3
+
+The original can't support PHP 5.3, and the PHP 5.3 Version offered by the original author lack of many features comparing with the new version(mainly event model)
+
+different to write in PHP5.3:
+```php
+	$controller = $this;
+	public function restEvents()
+    	{
+        	$this->onRest('req.auth.ajax.user', function()use($controller) {
+        		//please wrap this by use an va
+        	});
+        }
+```
+
 # _Starship / RestfullYii_
 
 Makes quickly adding a RESTFul API to your Yii project easy. RestfullYii provides full HTTP verb support (GET, PUT, POST, DELETE) for your resources, as well as the ability to offset, limit, sort, filter, etc… . You will also have the ability to read and manipulate related data with ease.
