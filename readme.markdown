@@ -4,9 +4,10 @@ The original can't support PHP 5.3, and the PHP 5.3 Version offered by the origi
 
 different to write in PHP5.3:
 ```php
-	$controller = $this;
+	
 	public function restEvents()
     	{
+		$controller = $this;
         	$this->onRest('req.auth.ajax.user', function()use($controller) {
         		//please wrap this by use an va
         	});
