@@ -57,7 +57,7 @@ class EHttpStatus {
 	/**
 	 * @var array All the http status messages.
 	 */
-	public static $messages = [
+	public static $messages = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
 		200 => 'OK',
@@ -98,7 +98,7 @@ class EHttpStatus {
 		503 => 'Service Unavailable',
 		504 => 'Gateway Timeout',
 		505 => 'HTTP Version Not Supported',
-	];
+	);
 
 	/**
 	 * @var int The http status code.

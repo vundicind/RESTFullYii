@@ -23,10 +23,10 @@ class ERestActiveRecordRelationBehavior extends EActiveRecordRelationBehavior
 	 */ 
 	public function events()
 	{
-		return [
+		return array(
 			'onBeforeSave'=>'beforeSave',
 			'onAfterSave'=>'afterSave',
-		];
+		);
 	}
 
 	/**
@@ -80,8 +80,9 @@ class ERestActiveRecordRelationBehavior extends EActiveRecordRelationBehavior
 			$relation_model->attributes = $attribute_cleaner($attributes);
 			$table = $relation_model->getMetaData()->tableSchema;
 			if(is_string($table->primaryKey)) {
-				if(isset($attribute_cleaner($attributes)[($table->primaryKey)])) {
-					$relation_model->setPrimaryKey($attribute_cleaner($attributes)[($table->primaryKey)]);
+                                $tbl =$attribute_cleaner($attributes);
+				if(isset($tbl[($table->primaryKey)])) {
+					$relation_model->setPrimaryKey($tbl[($table->primaryKey)]);
 				}
 			}	
 
@@ -117,7 +118,7 @@ class ERestActiveRecordRelationBehavior extends EActiveRecordRelationBehavior
 		{
 			if( $model->hasRelated($key) ) {
 				if( array_key_exists(0, $model->{$key}) ) {
-					$relation_data = [];
+					$relation_data = array();
 					foreach($model->{$key} as $index=>$attributes) {
 						if(!is_object($attributes)) {
 							$relation_data[$index] = $relation_helper($key, $attributes);

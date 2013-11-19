@@ -40,10 +40,10 @@ class ERestBehavior extends CBehavior
 	public final function ERestInit()
 	{
 		$this->event = New Eventor($this->owner, true);
-		$this->listeners = New ERestEventListenerRegistry([$this, 'onRest']);
+		$this->listeners = New ERestEventListenerRegistry($this,$this->owner);
 		$this->http_status = New EHttpStatus();
-		$this->resource_helper = new ERestResourceHelper([$this, 'emitRest']);
-		$this->subresource_helper = new ERestSubresourceHelper([$this, 'emitRest']);
+		$this->resource_helper = new ERestResourceHelper($this);
+		$this->subresource_helper = new ERestSubresourceHelper($this);
 		
 		Yii::app()->clientScript->reset(); //Remove any scripts registered by Controller Class
 		Yii::app()->onException = array($this, 'onException');
@@ -97,22 +97,26 @@ class ERestBehavior extends CBehavior
 	 * @param (String) (event) the name of the event
 	 * @param (Mixed/Array) params to pass to event listener
 	 */ 
-	public function emitRest($event, $params=[])
+	public function emitRest($event, $params=array())
 	{
-		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, ["pre.filter.$event"]);
-
+//            var_dump($this->event);
+            
+		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, array("pre.filter.$event"));
+                
 		if($this->eventExists("pre.filter.$event")) {
 			$params = $this->event->emit("pre.filter.$event", $params);
 		}
-
-		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, [$event]);
+                
+		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, array($event));
+                
 		$event_response = $this->event->emit($event, $params);
-
-		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, ["post.filter.$event"]);
+                
+		$this->event->emit(ERestEvent::REQ_EVENT_LOGGER, array("post.filter.$event"));
+                
 		if($this->eventExists("post.filter.$event")) {
-			return $this->event->emit("post.filter.$event", [$event_response]);
+			return $this->event->emit("post.filter.$event", array($event_response));
 		}
-
+                
 		return $event_response;
 	}
 
@@ -199,7 +203,7 @@ class ERestBehavior extends CBehavior
 		}
 		$errorCode = !isset($event->exception->statusCode)? 500: $event->exception->statusCode;
 		$this->setHttpStatus($errorCode, $message);
-		$this->emitRest(ERestEvent::REQ_EXCEPTION, [$errorCode, $message]);
+		$this->emitRest(ERestEvent::REQ_EXCEPTION, array($errorCode, $message));
 		$event->handled = true;
 	}
 
@@ -212,12 +216,8 @@ class ERestBehavior extends CBehavior
 	 */ 
 	public function renderJSON($params)
 	{
-		if(isset($this->owner)) {
-			$controller = $this->owner;
-		} else {
-			$controller = $this;
-		}
 		$this->getController()->layout = 'RestfullYii.views.layouts.json';
+//                $this->getController()->render('RestfullYii.views.api.output', $params);
 		$this->getController()->render('RestfullYii.views.api.output', $params);
     }
 
@@ -237,7 +237,7 @@ class ERestBehavior extends CBehavior
         }
 
 		if(PHP_SAPI != 'cli') {
-			return [ Yii::app()->request->url, $verb ];
+			return array( Yii::app()->request->url, $verb );
         } 
 
         //We now know we are on the cli so we will have to reconstruct the URI
@@ -251,7 +251,7 @@ class ERestBehavior extends CBehavior
         if(isset($_GET['param2'])) {
             $uri .= '/' . $_GET['param2'];
         }
-        return [ $uri, $verb ]; 
+        return array( $uri, $verb ); 
     }
 
     /**

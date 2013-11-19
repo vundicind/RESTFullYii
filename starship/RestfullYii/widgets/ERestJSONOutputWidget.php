@@ -28,11 +28,11 @@ class ERestJSONOutputWidget extends CWidget {
 	public $message = "";
 	public $totalCount;
 	public $modelName;
-	public $relations = [];
+	public $relations = array();
 	public $data;
 	public $errorCode = 500;
-	public $visibleProperties = [];
-	public $hiddenProperties = [];
+	public $visibleProperties = array();
+	public $hiddenProperties = array();
 
     /**
      * init
@@ -43,12 +43,12 @@ class ERestJSONOutputWidget extends CWidget {
     public function init()
     {
         if(is_null($this->visibleProperties)) {
-            $this->visibleProperties = [];
+            $this->visibleProperties = array();
         }
         if(is_null($this->hiddenProperties)) {
-            $this->hiddenProperties = [];
+            $this->hiddenProperties = array();
         }
-
+        
         parent::init();
     }
 	/**
@@ -89,14 +89,14 @@ class ERestJSONOutputWidget extends CWidget {
 	 */ 
 	public function outputError()
 	{
-		echo CJSON::encode([
+		echo CJSON::encode(array(
 			'success'	=> false,
 			'message'	=> $this->message,
-			'data'		=> [
+			'data'		=> array(
 				"errorCode"	=> $this->errorCode,
 				"message"		=> $this->message,
-			]
-		]);
+			)
+		));
 	}
 
 	/**
@@ -107,14 +107,14 @@ class ERestJSONOutputWidget extends CWidget {
 	 */ 
 	public function outputRest()
 	{
-		echo CJSON::encode([
+		echo CJSON::encode(array(
 			'success'	=> $this->success,
 			'message'	=> $this->message,
-			'data'		=> [
+			'data'		=> array(
 				"totalCount" => $this->totalCount,
 				lcfirst($this->modelName) => $this->modelsToArray($this->data, $this->relations),
-			]
-		]);
+			)
+		));
 	}
 
 	/**
@@ -128,30 +128,30 @@ class ERestJSONOutputWidget extends CWidget {
 	 *
 	 * @return (Array) the model(s) data represented as an array
 	 */
-	public function modelsToArray($model, $relations, $model_as_array = [])
+	public function modelsToArray($model, $relations, $model_as_array = array())
 	{
 		if(is_null($model)) {
-			return [];
+			return array();
 		}
 
-		$listOfModels = !is_array($model)? $listOfModels = [$model]: $listOfModels = $model;
-
-		$process_relations = function($relationName, $models) {
+		$listOfModels = !is_array($model)? $listOfModels = array($model): $listOfModels = $model;
+		$widget = $this;
+		$process_relations = function($relationName, $models)use($widget) {
 			if(is_null($models)){
 				return null;
 			}
             if( !is_array($models) ) {
-                return $this->processAttributes($models, $relationName);
+                return $widget->processAttributes($models, $relationName);
 			}
-			$list = [];
+			$list = array();
 			foreach($models as $model) {
-				$list[] = $this->processAttributes($model, $relationName);
+				$list[] = $widget->processAttributes($model, $relationName);
 			}
 			return $list;
 		};
 
-		array_walk($listOfModels, function($ar_model, $index) use($relations, &$model_as_array, $process_relations) {
-            $model_as_array[$index] = $this->processAttributes($ar_model);
+		array_walk($listOfModels, function($ar_model, $index) use($relations, &$model_as_array, $process_relations,$widget) {
+            $model_as_array[$index] = $widget->processAttributes($ar_model);
 			foreach($relations as $relation) {
 				$model_as_array[$index][$relation] = $process_relations($relation, $ar_model->$relation);
 			}
@@ -172,8 +172,8 @@ class ERestJSONOutputWidget extends CWidget {
 	 */
     public function propertyIsVisable($property, $relation=null)
     {
-        $main_model_visible_properties = [];
-        $related_model_visible_properties = []; 
+        $main_model_visible_properties = array();
+        $related_model_visible_properties = array(); 
 
         foreach($this->visibleProperties as $vp) {
             if(strpos($vp, '.') === false) {
@@ -182,7 +182,7 @@ class ERestJSONOutputWidget extends CWidget {
                 $vp = str_replace('*.', "$relation.", $vp); 
                 list($relation_name, $property_name) = explode('.', $vp); 
                 if(!isset($related_model_visible_properties[$relation_name])) {
-                    $related_model_visible_properties[$relation_name] = [];
+                    $related_model_visible_properties[$relation_name] = array();
                 }
                 $related_model_visible_properties[$relation_name][] = $vp;
             }
@@ -214,7 +214,7 @@ class ERestJSONOutputWidget extends CWidget {
 	 */
     public function processAttributes($model, $relation=null)
     {
-        $model_as_array = [];
+        $model_as_array = array();
         foreach($model->attributes as $property => $value) {
             if (!$this->propertyIsVisable($property, $relation)) {
                 continue;

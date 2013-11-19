@@ -26,7 +26,8 @@ class ERestSubresourceHelper implements iERestResourceHelper
 	 *
 	 * @param (callable) (emitter) Callback used to emit events
 	 */ 
-	public function __construct(Callable $emitter)
+//	public function __construct(Callable $emitter)
+        public function __construct($emitter)
 	{
 		$this->setEmitter($emitter);
 	}
@@ -38,7 +39,8 @@ class ERestSubresourceHelper implements iERestResourceHelper
 	 *
 	 * @param (Callable) (emitter) the emitter callback
 	 */
-	public function setEmitter(Callable $emitter)
+//	public function setEmitter(Callable $emitter)
+        public function setEmitter($emitter)
 	{
 		$this->emitter = $emitter;
 	}
@@ -70,7 +72,8 @@ class ERestSubresourceHelper implements iERestResourceHelper
 		if(!array_key_exists($subresource_name, $model->relations())) {
 			return false;
 		}
-		if($model->relations()[$subresource_name][0] != CActiveRecord::MANY_MANY) {
+                $relations = $model->relations();
+		if($relations[$subresource_name][0] != CActiveRecord::MANY_MANY) {
 			return false;
 		}
 		return true;
@@ -109,11 +112,11 @@ class ERestSubresourceHelper implements iERestResourceHelper
 		if( is_null($subresource_pk) ) {
 			$model_name = get_class($model);
 			$new_relation_name = "_" . $subresourceAR->active_relation->className . "Count";
-			$model->metaData->addRelation($new_relation_name, [
+			$model->metaData->addRelation($new_relation_name, array(
 				constant($model_name.'::STAT'),
 				$subresourceAR->active_relation->className, 
 				$subresourceAR->active_relation->foreignKey
-			]);
+			));
 			$model = $model->with($new_relation_name)->findByPk($pk);	
 			return $model->$new_relation_name;
 		} 
@@ -139,10 +142,10 @@ class ERestSubresourceHelper implements iERestResourceHelper
 		$subresource_relation = $model->getActiveRelation($subresource_name);
 		$sub_resource_model = $emitRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, new $subresource_relation->className);
 
-		return (object) [
+		return (object) array(
 			'active_relation'	=> $subresource_relation,
 			'model'						=> $sub_resource_model,
-		];
+		);
 	}
 
 	/**
@@ -165,13 +168,13 @@ class ERestSubresourceHelper implements iERestResourceHelper
 				->with($subresource_name)
 				->limit($emitRest(ERestEvent::MODEL_LIMIT))
 				->offset($emitRest(ERestEvent::MODEL_OFFSET))
-				->findByPk($pk, ['together'=>true]);
-			return !is_null($results->$subresource_name)? $results->$subresource_name: [];
+				->findByPk($pk, array('together'=>true));
+			return !is_null($results->$subresource_name)? $results->$subresource_name: array();
 		}
 		$results = $model
 			->with($subresource_name)
-			->findByPk($pk, ['condition'=>"$subresource_name.id=$subresource_pk"]);
-		return !is_null($results->$subresource_name)? $results->$subresource_name: [];
+			->findByPk($pk, array('condition'=>"$subresource_name.id=$subresource_pk"));
+		return !is_null($results->$subresource_name)? $results->$subresource_name: array();
 	}
 
 	/**
@@ -187,7 +190,8 @@ class ERestSubresourceHelper implements iERestResourceHelper
 	{
 		$emitRest = $this->getEmitter();
 		$model = $emitRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, $model);
-		return $model->parseManyManyFk($subresource_name, $model->relations()[$subresource_name]);
+                $relations = $model->relations();
+		return $model->parseManyManyFk($subresource_name, $relations[$subresource_name]);
 	}
 
 	/**

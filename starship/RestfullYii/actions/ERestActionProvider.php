@@ -22,11 +22,11 @@ class ERestActionProvider extends CWidget
 	 */ 
 	public static function actions() 
 	{
-		return [
+		return array(
 			'GET'=>'RestfullYii.actions.EActionRestGET',
 			'PUT'=>'RestfullYii.actions.EActionRestPUT',
 			'POST'=>'RestfullYii.actions.EActionRestPOST',
 			'DELETE'=>'RestfullYii.actions.EActionRestDELETE',
-		];
+		);
 	}
 }

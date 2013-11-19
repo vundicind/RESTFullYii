@@ -28,23 +28,16 @@ class ERestFilter extends CFilter
 	{
 		$controller = $filterChain->controller;
 
-		$controller->attachBehaviors([
-			'ERestBehavior'=>'RestfullYii.behaviors.ERestBehavior'
-		]);
-		$controller->ERestInit();
-
-		/**
-		 * Since we are going to be outputting JSON
-		 * we disable CWebLogRoute unless otherwise indicated
-		 */ 
-		if( $controller->emitRest(ERestEvent::REQ_DISABLE_CWEBLOGROUTE ) ){
-			foreach (Yii::app()->log->routes as $route) {
-				if ( $route instanceof CWebLogRoute ) {
-						$route->enabled = false;
-				}
+		foreach (Yii::app()->log->routes as $route) {
+			if ( $route instanceof CWebLogRoute ) {
+					$route->enabled = false;
 			}
 		}
-
+		
+		$controller->attachBehaviors(array(
+			'ERestBehavior'=>'RestfullYii.behaviors.ERestBehavior'
+		));
+		$controller->ERestInit();	
 
 		if( $controller->emitRest(ERestEvent::REQ_AUTH_HTTPS_ONLY) ) {
 			if( !$this->validateHttpsOnly() ) {
@@ -53,11 +46,11 @@ class ERestFilter extends CFilter
 		}
 
 		if( !$controller->emitRest(ERestEvent::REQ_AUTH_AJAX_USER) ) {
-			if(!$controller->emitRest(ERestEvent::REQ_AUTH_USER, [
+			if(!$controller->emitRest(ERestEvent::REQ_AUTH_USER, array(
 				$controller->emitRest(ERestEvent::CONFIG_APPLICATION_ID),
 				$controller->emitRest(ERestEvent::REQ_AUTH_USERNAME),
 				$controller->emitRest(ERestEvent::REQ_AUTH_PASSWORD),
-			])) {
+			))) {
 				throw new CHttpException(401, "Unauthorized");
 			}
 		}

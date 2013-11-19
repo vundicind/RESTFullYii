@@ -26,7 +26,8 @@ class ERestResourceHelper implements iERestResourceHelper
 	 *
 	 * @param (callable) (emitter) Callback used to emit events
 	 */ 
-	public function __construct(Callable $emitter)
+//	public function __construct(Callable $emitter)
+        public function __construct($emitter)
 	{
 		$this->setEmitter($emitter);
 	}
@@ -38,7 +39,8 @@ class ERestResourceHelper implements iERestResourceHelper
 	 *
 	 * @param (Callable) (emitter) the emitter callback
 	 */
-	public function setEmitter(Callable $emitter)
+//	public function setEmitter(Callable $emitter)
+        public function setEmitter($emitter)
 	{
 		$this->emitter = $emitter;
 	}
@@ -68,21 +70,22 @@ class ERestResourceHelper implements iERestResourceHelper
 	public function prepareRestModel($id=null, $count=false)
 	{
 		$emitRest = $this->getEmitter();
-
-		$model = $emitRest(ERestEvent::MODEL_INSTANCE);
-		$model = $emitRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, $model);
-
-		$scenario = $emitRest(ERestEvent::MODEL_SCENARIO);
+                
+		$model = $emitRest->emitRest(ERestEvent::MODEL_INSTANCE);
+        
+		$model = $emitRest->emitRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, $model);
+                
+		$scenario = $emitRest->emitRest(ERestEvent::MODEL_SCENARIO);
 		if(!is_null($scenario) && $scenario !== false) {
 			$model->scenario = $scenario;
 		}
 		
-		if($emitRest(ERestEvent::MODEL_LAZY_LOAD_RELATIONS) === false) {
+		if($emitRest->emitRest(ERestEvent::MODEL_LAZY_LOAD_RELATIONS) === false) {
 			$model = $this->applyScope(ERestEvent::MODEL_WITH_RELATIONS, $model, 'with', true);
 		}
 
 		if(!empty($id)) {
-			$model_found = $emitRest(ERestEvent::MODEL_FIND, [$model, $id]);
+			$model_found = $emitRest->emitRest(ERestEvent::MODEL_FIND, array($model, $id));
 			if(is_null($model_found)) {
 				throw new CHttpException(404, "RESOURCE '$id' NOT FOUND");
 			}
@@ -93,13 +96,13 @@ class ERestResourceHelper implements iERestResourceHelper
 		$model = $this->applyScope(ERestEvent::MODEL_SORT, $model, 'orderBy', false);
 
 		if($count) {
-			return $emitRest(ERestEvent::MODEL_COUNT, $model);
+			return $emitRest->emitRest(ERestEvent::MODEL_COUNT, $model);
 		} 
 
 		$model = $this->applyScope(ERestEvent::MODEL_LIMIT, $model, 'limit', false);
 		$model = $this->applyScope(ERestEvent::MODEL_OFFSET, $model, 'offset', false);
 
-		return $emitRest(ERestEvent::MODEL_FIND_ALL, $model);
+		return $emitRest->emitRest(ERestEvent::MODEL_FIND_ALL, $model);
 	}
 
 	/**
@@ -120,9 +123,9 @@ class ERestResourceHelper implements iERestResourceHelper
 		$emitRest = $this->getEmitter();
 
 		if(!$pass_model) {
-			$scope_params = $emitRest($event);
+			$scope_params = $emitRest->emitRest($event);
 		} else {
-			$scope_params = $emitRest($event, $model);
+			$scope_params = $emitRest->emitRest($event, $model);
 		}
 		if(!is_null($scope_params) && $scope_params !== false) {
 			return $model->$scope_name($scope_params);
@@ -144,6 +147,9 @@ class ERestResourceHelper implements iERestResourceHelper
 	 */
 	public function setModelAttributes($model, $data, $restricted_properties)
 	{
+		if(!is_array($data)){
+			throw new CHttpException(406, 'Post json data empty');
+		}
 		foreach($data as $var=>$value) {
 			if(($model->hasAttribute($var) || isset($model->metadata->relations[$var])) && !in_array($var, $restricted_properties)) {	
 				$model->$var = $value;	

@@ -16,7 +16,7 @@
 class ERestEventListenerRegistry
 {
 	private $onRest;
-
+        private $bound_obj;
 	/**
 	 * __construct
 	 *
@@ -24,11 +24,37 @@ class ERestEventListenerRegistry
 	 *
 	 * @params (Callable) (onRest) callable for handler registration
 	 */
-	function __construct(Callable $onRest)
+//	function __construct(Callable $onRest)
+        function __construct($onRest,$bound_obj)
 	{
 		$this->onRest = $onRest;
+                $this->setBoundObj($bound_obj);
+	}
+        
+        /**
+	 * setBoundObj
+	 *
+	 * Setter for $this->bound_obj
+	 *
+	 * @param (Object) (bound_obj) Object to bind event listener to.
+	 */
+	public function setBoundObj($obj)
+	{
+		$this->bound_obj = $obj;
 	}
 
+	/**
+	 * getBoundObj
+	 *
+	 * Getter for $this->bound_obj
+	 *
+	 * @return (Object) (bound_obj)
+	 */
+	public function getBoundObj()
+	{
+		return $this->bound_obj;
+	}
+        
 	/**
 	 * run
 	 *
@@ -37,7 +63,7 @@ class ERestEventListenerRegistry
 	public final function run()
 	{
 		$onRest = $this->onRest;
-
+                $bound_obj = $this->getBoundObj();
 		/**
 		 * config.dev.flag
 		 *
@@ -45,10 +71,15 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (bool) true by default
 		 */
-		$onRest(ERestEvent::CONFIG_DEV_FLAG, function() {
+//                var_dump($onRest);
+//                echo ERestEvent::CONFIG_DEV_FLAG;
+//                $onRest->invokeArgs($onRest->,array(ERestEvent::CONFIG_DEV_FLAG,function() {
+//			return true;
+//		}));
+                $onRest->onRest(ERestEvent::CONFIG_DEV_FLAG,function() {
 			return true;
 		});
-
+//		$onRest->onRest(ERestEvent::CONFIG_DEV_FLAG, "func");
 		/**
 		 * config.application.id
 		 *
@@ -56,7 +87,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (String) default is 'REST'
 		 */
-		$onRest(ERestEvent::CONFIG_APPLICATION_ID, function() {
+		$onRest->onRest(ERestEvent::CONFIG_APPLICATION_ID, function() {
 			return 'REST';
 		});
 
@@ -70,23 +101,11 @@ class ERestEventListenerRegistry
 		 * @return (Array) the params sent into the event logger
 		 * 
 		 */
-		$onRest(ERestEvent::REQ_EVENT_LOGGER, function($event, $category='application', $ignore=[]) {
+		$onRest->onRest(ERestEvent::REQ_EVENT_LOGGER, function($event, $category='application', $ignore=array()) {
 			if(!isset($ignore[$event])) {
 				Yii::trace($event, $category);
 			}
-			return [$event, $category, $ignore];
-		});
-
-		/**
-		 *
-		 * req.disable.cweblogroute
-		 *
-		 * this is only relivent if you have enabled CWebLogRoute in your main config
-		 *
-		 * @return (Bool) true (default) to disable CWebLogRoute, false to allow
-		 */
-		$onRest(ERestEvent::REQ_DISABLE_CWEBLOGROUTE, function() {
-			return true;
+			return array($event, $category, $ignore);
 		});
 
 		/**
@@ -98,13 +117,13 @@ class ERestEventListenerRegistry
 		 * @param (Int) (errorCode) the http status code
 		 * @param (String) the error message
 		 */
-		$onRest(ERestEvent::REQ_EXCEPTION, function($errorCode, $message=null) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_EXCEPTION, function($errorCode, $message=null)use($onRest) {
+			$onRest->renderJSON(array(
 				'type'			=> 'error',
 				'success'		=> false,
-				'message'		=> (is_null($message)? $this->getHttpStatus()->message: $message),
+				'message'		=> (is_null($message)? $onRest->getHttpStatus()->message: $message),
 				'errorCode' => $errorCode,
-			]);
+			));
 		});
 
 		/**
@@ -118,7 +137,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Bool) return true to grant access; false to deny access
 		 */ 
-		$onRest(ERestEvent::REQ_AUTH_AJAX_USER, function() {
+		$onRest->onRest(ERestEvent::REQ_AUTH_AJAX_USER, function() {
 			if(Yii::app()->user->isGuest) {
 				return false;
 			}
@@ -133,7 +152,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (bool) default is false
 		 */ 
-		$onRest(ERestEvent::REQ_AUTH_HTTPS_ONLY, function() {
+		$onRest->onRest(ERestEvent::REQ_AUTH_HTTPS_ONLY, function() {
 			return false;
 		});
 
@@ -145,9 +164,9 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (bool) default is true
 		 */ 
-        $onRest(ERestEvent::REQ_AUTH_URI, function($uri, $verb) {
-            return true;
-        });
+                $onRest->onRest(ERestEvent::REQ_AUTH_URI, function($uri, $verb) {
+                    return true;
+                });
 
 		/**
 		 * req.auth.username
@@ -157,7 +176,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (String) the username
 		 */ 
-		$onRest(ERestEvent::REQ_AUTH_USERNAME, function(){
+		$onRest->onRest(ERestEvent::REQ_AUTH_USERNAME, function(){
 			return 'admin@restuser';
 		});
 
@@ -169,7 +188,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (String) the password
 		 */ 
-		$onRest(ERestEvent::REQ_AUTH_PASSWORD, function(){
+		$onRest->onRest(ERestEvent::REQ_AUTH_PASSWORD, function(){
 			return 'admin@Access';
 		});
 
@@ -184,7 +203,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Bool) true to grant access; false to deny access
 		 */ 
-		$onRest(ERestEvent::REQ_AUTH_USER, function($application_id, $username, $password) {
+		$onRest->onRest(ERestEvent::REQ_AUTH_USER, function($application_id, $username, $password) {
 			if(!isset($_SERVER['HTTP_X_'.$application_id.'_USERNAME']) || !isset($_SERVER['HTTP_X_'.$application_id.'_PASSWORD'])) {
 				return false;
 			}
@@ -203,7 +222,7 @@ class ERestEventListenerRegistry
 		 * Called after the request has been fulfilled
 		 * By default it has no behavior
 		 */ 
-		$onRest(ERestEvent::REQ_AFTER_ACTION, function($filterChain) {
+		$onRest->onRest(ERestEvent::REQ_AFTER_ACTION, function($filterChain) {
 			//Logic being applied after the action is executed
 		});
 
@@ -216,10 +235,10 @@ class ERestEventListenerRegistry
 		 * @param (Array) (relations) the list of relations to include with the data
 		 * @param (Int) (count) the count of records to return (will be either 1 or 0)
 		 */
-		$onRest(ERestEvent::REQ_GET_RESOURCE_RENDER, function($data, $model_name, $relations, $count, $visibleProperties=[], $hiddenProperties=[]) {
+		$onRest->onRest(ERestEvent::REQ_GET_RESOURCE_RENDER, function($data, $model_name, $relations, $count, $visibleProperties=array(), $hiddenProperties=array())use($onRest) {
 			//Handler for GET (single resource) request
-			;$this->setHttpStatus(200);
-			$this->renderJSON([
+			;$onRest->setHttpStatus(200);
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> (($count > 0)? true: false),
 				'message'			=> (($count > 0)? "Record Found": "No Record Found"),
@@ -229,7 +248,7 @@ class ERestEventListenerRegistry
 				'visibleProperties' => $visibleProperties,
 				'hiddenProperties' => $hiddenProperties,
 				'data'				=> $data,
-			]);
+			));
 		});
 
 		/**
@@ -242,10 +261,10 @@ class ERestEventListenerRegistry
 		 * @param (Array) (relations) the list of relations to include with the data
 		 * @param (Int) (count) the count of records to return
 		 */
-		$onRest(ERestEvent::REQ_GET_RESOURCES_RENDER, function($data, $model_name, $relations, $count, $visibleProperties=[], $hiddenProperties=[]) {
+		$onRest->onRest(ERestEvent::REQ_GET_RESOURCES_RENDER, function($data, $model_name, $relations, $count, $visibleProperties=array(), $hiddenProperties=array())use($onRest) {
 			//Handler for GET (list resources) request
-			;$this->setHttpStatus(200);
-			$this->renderJSON([
+			;$onRest->setHttpStatus(200);
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> (($count > 0)? true: false),
 				'message'			=> (($count > 0)? "Record(s) Found": "No Record(s) Found"),
@@ -255,7 +274,7 @@ class ERestEventListenerRegistry
 				'visibleProperties' => $visibleProperties,
 				'hiddenProperties' => $hiddenProperties,
 				'data'				=> $data,
-			]);
+			));
 		});
 		
 		/**
@@ -267,10 +286,10 @@ class ERestEventListenerRegistry
 		 * @param (String) (subresource_name) the name of the sub-resources to render
 		 * @param (Int) (count) the count of sub-resources to render
 		 */
-		$onRest(ERestEvent::REQ_GET_SUBRESOURCES_RENDER, function($models, $subresource_name, $count, $visibleProperties=[], $hiddenProperties=[]) {
-			;$this->setHttpStatus(200);
+		$onRest->onRest(ERestEvent::REQ_GET_SUBRESOURCES_RENDER, function($models, $subresource_name, $count, $visibleProperties=array(), $hiddenProperties=array())use($onRest) {
+			;$onRest->setHttpStatus(200);
 			
-			$this->renderJSON([
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> (($count > 0)? true: false),
 				'message'			=> (($count > 0)? "Record(s) Found": "No Record(s) Found"),
@@ -279,7 +298,7 @@ class ERestEventListenerRegistry
 				'visibleProperties' => $visibleProperties,
 				'hiddenProperties' => $hiddenProperties,
 				'data'				=> $models,
-			]);
+			));
 		});
 
 		/**
@@ -291,10 +310,10 @@ class ERestEventListenerRegistry
 		 * @param (String) (subresource_name) the name of the sub-resource to render
 		 * @param (Int) (count) the count of sub-resources to render (will be either 1 or 0)
 		 */
-		$onRest(ERestEvent::REQ_GET_SUBRESOURCE_RENDER, function($model, $subresource_name, $count, $visibleProperties=[], $hiddenProperties=[]) {
-			;$this->setHttpStatus(200);
+		$onRest->onRest(ERestEvent::REQ_GET_SUBRESOURCE_RENDER, function($model, $subresource_name, $count, $visibleProperties=array(), $hiddenProperties=array())use($onRest) {
+			;$onRest->setHttpStatus(200);
 
-			$this->renderJSON([
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> true,
 				'message'			=> (($count > 0)? "Record(s) Found": "No Record(s) Found"),
@@ -303,7 +322,7 @@ class ERestEventListenerRegistry
 				'visibleProperties' => $visibleProperties,
 				'hiddenProperties' => $hiddenProperties,
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -314,8 +333,8 @@ class ERestEventListenerRegistry
 		 * @param (Object) (model) the newly created model
 		 * @param (Array) (relations) list of relations to render with model
 		 */
-		$onRest(ERestEvent::REQ_POST_RESOURCE_RENDER, function($model, $relations=[]) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_POST_RESOURCE_RENDER, function($model, $relations=array())use($onRest) {
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> 'true',
 				'message'			=> "Record Created",
@@ -323,7 +342,7 @@ class ERestEventListenerRegistry
 				'modelName'		=> get_class($model),
 				'relations'		=> $relations,
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -334,8 +353,8 @@ class ERestEventListenerRegistry
 		 * @param (Object) (model) the updated model
 		 * @param (Array) (relations) list of relations to render with model
 		 */
-		$onRest(ERestEvent::REQ_PUT_RESOURCE_RENDER, function($model, $relations) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_PUT_RESOURCE_RENDER, function($model, $relations)use($onRest) {
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> 'true',
 				'message'			=> "Record Updated",
@@ -343,7 +362,7 @@ class ERestEventListenerRegistry
 				'modelName'		=> get_class($model),
 				'relations'		=> $relations,
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -355,16 +374,16 @@ class ERestEventListenerRegistry
 		 * @param (String) (subresource_name) the name of the sub-resource
 		 * @param (Mixed/Int) (subresource_id) the primary key of the sub-resource
 		 */
-		$onRest(ERestEvent::REQ_PUT_SUBRESOURCE_RENDER, function($model, $subresource_name, $subresource_id) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_PUT_SUBRESOURCE_RENDER, function($model, $subresource_name, $subresource_id)use($onRest) {
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> 'true',
 				'message'			=> "Subresource Added",
 				'totalCount'	=> "1",
 				'modelName'		=> get_class($model),
-				'relations'		=> [$subresource_name],
+				'relations'		=> array($subresource_name),
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -374,16 +393,16 @@ class ERestEventListenerRegistry
 		 *
 		 * @param (Object) (model) this is the deleted model object for the resource
 		 */
-		$onRest(ERestEvent::REQ_DELETE_RESOURCE_RENDER, function($model) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_DELETE_RESOURCE_RENDER, function($model)use($onRest) {
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> 'true',
 				'message'			=> "Record Deleted",
 				'totalCount'	=> "1",
 				'modelName'		=> get_class($model),
-				'relations'		=> [],
+				'relations'		=> array(),
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -395,16 +414,16 @@ class ERestEventListenerRegistry
 		 * @param (String) (subresource_name) the name of the deleted sub-resource
 		 * @param (Mixed/Int) (subresource_id) the primary key of the deleted sub-resource
 		 */
-		$onRest(ERestEvent::REQ_DELETE_SUBRESOURCE_RENDER, function($model, $subresource_name, $subresource_id) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_DELETE_SUBRESOURCE_RENDER, function($model, $subresource_name, $subresource_id)use($onRest) {
+			$onRest->renderJSON(array(
 				'type'				=> 'rest',
 				'success'			=> 'true',
 				'message'			=> "Sub-Resource Deleted",
 				'totalCount'	=> "1",
 				'modelName'		=> get_class($model),
-				'relations'		=> [$subresource_name],
+				'relations'		=> array($subresource_name),
 				'data'				=> $model,
-			]);
+			));
 		});
 
 		/**
@@ -418,8 +437,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Int) count of the subresources
 		 */
-		$onRest(ERestEvent::MODEL_SUBRESOURCE_COUNT, function($model, $subresource_name, $subresource_id=null) {
-			return $this->getSubresourceHelper()->getSubresourceCount($model, $subresource_name, $subresource_id);
+		$onRest->onRest(ERestEvent::MODEL_SUBRESOURCE_COUNT, function($model, $subresource_name, $subresource_id=null)use($onRest) {
+			return $onRest->getSubresourceHelper()->getSubresourceCount($model, $subresource_name, $subresource_id);
 		});
 
 		/**
@@ -433,8 +452,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the sub-resource model
 		 */
-		$onRest(ERestEvent::MODEL_SUBRESOURCE_FIND, function($model, $subresource_name, $subresource_id) {
-			$subresource = @$this->getSubresourceHelper()->getSubresource($model, $subresource_name, $subresource_id);
+		$onRest->onRest(ERestEvent::MODEL_SUBRESOURCE_FIND, function($model, $subresource_name, $subresource_id)use($onRest) {
+			$subresource = @$onRest->getSubresourceHelper()->getSubresource($model, $subresource_name, $subresource_id);
 			if(count($subresource) > 0) {
 				return $subresource[0];
 			}
@@ -451,8 +470,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of sub-resource models
 		 */
-		$onRest(ERestEvent::MODEL_SUBRESOURCES_FIND_ALL, function($model, $subresource_name) {
-			return $this->getSubresourceHelper()->getSubresource($model, $subresource_name);
+		$onRest->onRest(ERestEvent::MODEL_SUBRESOURCES_FIND_ALL, function($model, $subresource_name)use($onRest) {
+			return $onRest->getSubresourceHelper()->getSubresource($model, $subresource_name);
 		});
 
 		/**
@@ -463,7 +482,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (bool) true to confirm primary key; false to deny
 		 */
-		$onRest(ERestEvent::REQ_PARAM_IS_PK, function($pk) {
+		$onRest->onRest(ERestEvent::REQ_PARAM_IS_PK, function($pk) {
 			return $pk === '0' || preg_match('/^-?[1-9][0-9]*$/', $pk) === 1;
 		});
 
@@ -475,8 +494,9 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) an empty instance of a resources Active Record model
 		 */
-		$onRest(ERestEvent::MODEL_INSTANCE, function() {
-			$modelName = str_replace('Controller', '', get_class($this));
+                
+		$onRest->onRest(ERestEvent::MODEL_INSTANCE, function()use($bound_obj) {
+			$modelName = str_replace('Controller', '', get_class($bound_obj));
 			return new $modelName();
 		});
 
@@ -490,7 +510,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) an instance of an Active Record model
 		 */
-		$onRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, function($model) {
+		$onRest->onRest(ERestEvent::MODEL_ATTACH_BEHAVIORS, function($model) {
 			//Attach this behavior to help saving nested models
 			if(!array_key_exists('ERestActiveRecordRelationBehavior', $model->behaviors())) {
 				$model->attachBehavior('ERestActiveRecordRelationBehavior', new ERestActiveRecordRelationBehavior());
@@ -510,7 +530,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Int) the number of results to return
 		 */
-		$onRest(ERestEvent::MODEL_LIMIT, function() {
+		$onRest->onRest(ERestEvent::MODEL_LIMIT, function() {
 			return isset($_GET['limit'])? $_GET['limit']: 100;
 		});
 
@@ -522,7 +542,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Int) the offset of results to return
 		 */
-		$onRest(ERestEvent::MODEL_OFFSET, function() {
+		$onRest->onRest(ERestEvent::MODEL_OFFSET, function() {
 			return isset($_GET['offset'])? $_GET['offset']: 0;
 		});
 
@@ -535,7 +555,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (String) the scenario name
 		 */
-		$onRest(ERestEvent::MODEL_SCENARIO, function() {
+		$onRest->onRest(ERestEvent::MODEL_SCENARIO, function() {
 			return isset($_GET['scenario'])? $_GET['scenario']: 'restfullyii';
 		});
 
@@ -550,7 +570,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (JSON) the filter to apply
 		 */
-		$onRest(ERestEvent::MODEL_FILTER, function() {
+		$onRest->onRest(ERestEvent::MODEL_FILTER, function() {
 			return isset($_GET['filter'])? $_GET['filter']: null;
 		});
 
@@ -564,7 +584,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (JSON) the sort to apply
 		 */ 
-		$onRest(ERestEvent::MODEL_SORT, function() {
+		$onRest->onRest(ERestEvent::MODEL_SORT, function() {
 			return isset($_GET['sort'])? $_GET['sort']: null;
 		});
 
@@ -578,12 +598,12 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of relations (Strings) to attach to resources output
 		 */
-		$onRest(ERestEvent::MODEL_WITH_RELATIONS, function($model) {
-			$nestedRelations = [];
+		$onRest->onRest(ERestEvent::MODEL_WITH_RELATIONS, function($model) {
+			$nestedRelations = array();
 			foreach($model->metadata->relations as $rel=>$val)
 			{
 				$className = $val->className;
-				$rel_model = call_user_func([$className, 'model']);
+				$rel_model = call_user_func(array($className, 'model'));//array($className, 'model')
 				if(!is_array($rel_model->tableSchema->primaryKey) && substr($rel, 0, 1) != '_') {
 					$nestedRelations[] = $rel;
 				}
@@ -600,7 +620,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Bool) true to lazy load relations; false to eager load
 		 */
-		$onRest(ERestEvent::MODEL_LAZY_LOAD_RELATIONS, function() {
+		$onRest->onRest(ERestEvent::MODEL_LAZY_LOAD_RELATIONS, function() {
 			return true;
 		});
 
@@ -614,7 +634,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the found model
 		 */
-		$onRest(ERestEvent::MODEL_FIND, function($model, $id) {
+		$onRest->onRest(ERestEvent::MODEL_FIND, function($model, $id) {
 			return $model->findByPk($id);
 		});
 
@@ -627,7 +647,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of found models
 		 */
-		$onRest(ERestEvent::MODEL_FIND_ALL, function($model) {
+		$onRest->onRest(ERestEvent::MODEL_FIND_ALL, function($model) {
 			return $model->findAll();
 		});
 
@@ -640,7 +660,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Int) the count of models
 		 */
-		$onRest(ERestEvent::MODEL_COUNT, function($model) {
+		$onRest->onRest(ERestEvent::MODEL_COUNT, function($model) {
 			return $model->count();
 		});
 
@@ -653,7 +673,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) the JSON decoded array of data
 		 */ 
-		$onRest(ERestEvent::REQ_DATA_READ, function($stream='php://input') {
+		$onRest->onRest(ERestEvent::REQ_DATA_READ, function($stream='php://input') {
 			$reader = new ERestRequestReader($stream);
 			return CJSON::decode($reader->getContents());
 		});
@@ -666,11 +686,11 @@ class ERestEventListenerRegistry
 		 *
 		 * @param (Array) (data) data to be rendered
 		 */
-		$onRest(ERestEvent::REQ_RENDER_JSON, function($data) {
-			$this->renderJSON([
+		$onRest->onRest(ERestEvent::REQ_RENDER_JSON, function($data)use($onRest) {
+			$onRest->renderJSON(array(
 				'type' => 'raw',
 				'data' => $data,
-			]);
+			));
 		});
 
 		/**
@@ -684,8 +704,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the model with posted data applied
 		 */
-		$onRest(ERestEvent::MODEL_APPLY_POST_DATA, function($model, $data, $restricted_properties) {
-			return $this->getResourceHelper()->setModelAttributes($model, $data, $restricted_properties);
+		$onRest->onRest(ERestEvent::MODEL_APPLY_POST_DATA, function($model, $data, $restricted_properties)use($onRest) {
+			return $onRest->getResourceHelper()->setModelAttributes($model, $data, $restricted_properties);
 		});
 
 		/**
@@ -699,8 +719,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the model with PUT data applied
 		 */
-		$onRest(ERestEvent::MODEL_APPLY_PUT_DATA, function($model, $data, $restricted_properties) {
-			return $this->getResourceHelper()->setModelAttributes($model, $data, $restricted_properties);
+		$onRest->onRest(ERestEvent::MODEL_APPLY_PUT_DATA, function($model, $data, $restricted_properties)use($onRest) {
+			return $onRest->getResourceHelper()->setModelAttributes($model, $data, $restricted_properties);
 		});
 
 		/**
@@ -711,8 +731,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of restricted properties
 		 */
-		$onRest(ERestEvent::MODEL_RESTRICTED_PROPERTIES, function() {
-			return [];
+		$onRest->onRest(ERestEvent::MODEL_RESTRICTED_PROPERTIES, function() {
+			return array();
 		});
 
 		/**
@@ -723,8 +743,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of visible properties
 		 */
-		$onRest(ERestEvent::MODEL_VISIBLE_PROPERTIES, function() {
-			return [];
+		$onRest->onRest(ERestEvent::MODEL_VISIBLE_PROPERTIES, function() {
+			return array();
 		});
 
 		/**
@@ -735,8 +755,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Array) list of hidden properties
 		 */
-		$onRest(ERestEvent::MODEL_HIDDEN_PROPERTIES, function() {
-			return [];
+		$onRest->onRest(ERestEvent::MODEL_HIDDEN_PROPERTIES, function() {
+			return array();
 		});
 
 		/**
@@ -748,7 +768,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the saved resource
 		 */
-		$onRest(ERestEvent::MODEL_SAVE, function($model) {
+		$onRest->onRest(ERestEvent::MODEL_SAVE, function($model) {
 			if(!$model->save()) {
 				throw new CHttpException('400', CJSON::encode($model->errors));
 			}
@@ -767,8 +787,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the updated model representing the owner of the sub-resource
 		 */
-		$onRest(ERestEvent::MODEL_SUBRESOURCE_SAVE, function($model, $subresource_name, $subresource_id) {
-			if(!$this->getSubresourceHelper()->putSubresourceHelper($model, $subresource_name, $subresource_id)) {
+		$onRest->onRest(ERestEvent::MODEL_SUBRESOURCE_SAVE, function($model, $subresource_name, $subresource_id)use($onRest) {
+			if(!$onRest->getSubresourceHelper()->putSubresourceHelper($model, $subresource_name, $subresource_id)) {
 				throw new CHttpException('500', 'Could not save Sub-Resource');
 			}
 			$model->refresh();
@@ -782,7 +802,7 @@ class ERestEventListenerRegistry
 		 *
 		 * @param (Object) (model) the model resource to be deleted
 		 */
-		$onRest(ERestEvent::MODEL_DELETE, function($model) {
+		$onRest->onRest(ERestEvent::MODEL_DELETE, function($model) {
 			if(!$model->delete()) {
 				throw new CHttpException(500, 'Could not delete model');
 			}
@@ -800,8 +820,8 @@ class ERestEventListenerRegistry
 		 *
 		 * @return (Object) the updated model representing the owner of the sub-resource
 		 */
-		$onRest(ERestEvent::MODEL_SUBRESOURCE_DELETE, function($model, $subresource_name, $subresource_id) {
-			if(!$this->getSubresourceHelper()->deleteSubResource($model, $subresource_name, $subresource_id)) {
+		$onRest->onRest(ERestEvent::MODEL_SUBRESOURCE_DELETE, function($model, $subresource_name, $subresource_id)use($onRest) {
+			if(!$onRest->getSubresourceHelper()->deleteSubResource($model, $subresource_name, $subresource_id)) {
 				throw new CHttpException(500, 'Could not delete Sub-Resource');
 			}
 			$model->refresh();

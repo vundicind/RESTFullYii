@@ -8,6 +8,6 @@ $this->widget('RestfullYii.widgets.ERestJSONOutputWidget', array(
 	'visibleProperties'		=>(isset($visibleProperties)? $visibleProperties: null),
 	'hiddenProperties'		=>(isset($hiddenProperties)? $hiddenProperties: null),
 	'data'				=>(isset($data)? $data: null),
-	'relations'		=>(isset($relations)? $relations: []),
+	'relations'		=>(isset($relations)? $relations: array()),
 	'errorCode'		=>(isset($errorCode)? $errorCode: null),
 ));

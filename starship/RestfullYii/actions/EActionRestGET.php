@@ -30,27 +30,27 @@ class EActionRestGET extends ERestBaseAction
 		$hiddenProperties = $this->controller->emitRest(ERestEvent::MODEL_HIDDEN_PROPERTIES);
 		switch ($this->getRequestActionType($id, $param1, $param2, 'get')) {
 			case 'RESOURCES':
-				$this->controller->emitRest(ERestEvent::REQ_GET_RESOURCES_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_GET_RESOURCES_RENDER, array(
 					$this->getModel($id), $this->getModelName(), $this->getRelations(), $this->getModelCount($id), $visibleProperties, $hiddenProperties
-				]);
+				));
 				break;
 			case 'CUSTOM':
-				$this->controller->emitRest("req.get.$id.render", [$param1, $param2]);
+				$this->controller->emitRest("req.get.$id.render", array($param1, $param2));
 				break;
 			case 'SUBRESOURCES':
-				$this->controller->emitRest(ERestEvent::REQ_GET_SUBRESOURCES_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_GET_SUBRESOURCES_RENDER, array(
 					$this->getSubresources($id, $param1), $this->getSubresourceClassName($param1), $this->getSubresourceCount($id, $param1, $param2), $visibleProperties, $hiddenProperties
-				]);
+				));
 				break;
 			case 'SUBRESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_GET_SUBRESOURCE_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_GET_SUBRESOURCE_RENDER, array(
 					$this->getSubresource($id, $param1, $param2), $this->getSubresourceClassName($param1), $this->getSubresourceCount($id, $param1, $param2), $visibleProperties, $hiddenProperties
-				]);
+				));
 				break;
 			case 'RESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_GET_RESOURCE_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_GET_RESOURCE_RENDER, array(
 					$this->getModel($id), $this->getModelName(), $this->getRelations(), $this->getModelCount($id), $visibleProperties, $hiddenProperties
-				]);
+				));
 				break;
 			default:
 				throw new CHttpException(404, "Resource Not Found");

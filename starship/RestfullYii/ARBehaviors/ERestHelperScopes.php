@@ -24,9 +24,9 @@ class ERestHelperScopes extends CActiveRecordBehavior
 	 */ 
 	public function limit($limit) 
 	{
-		$this->Owner->getDbCriteria()->mergeWith([
+		$this->Owner->getDbCriteria()->mergeWith(array(
 			'limit' => $limit
-		]);
+		));
 		return $this->Owner;
 	}
 
@@ -41,9 +41,9 @@ class ERestHelperScopes extends CActiveRecordBehavior
 	 */ 
 	public function offset($offset) 
 	{
-		$this->Owner->getDbCriteria()->mergeWith([
+		$this->Owner->getDbCriteria()->mergeWith(array(
 			'offset' => $offset
-		]);
+		));
 		return $this->Owner;
 	}
 
@@ -64,9 +64,9 @@ class ERestHelperScopes extends CActiveRecordBehavior
 		}
 
 		if (!is_array($orderListItems = CJSON::decode($field))) {
-			$this->Owner->getDbCriteria()->mergeWith([
+			$this->Owner->getDbCriteria()->mergeWith(array(
 				'order' => $this->getSortSQL($field, $dir)
-			]);
+			));
 			return $this->Owner;
 		} else {
 			$orderByStr = "";
@@ -74,9 +74,9 @@ class ERestHelperScopes extends CActiveRecordBehavior
 				$orderByStr .= ((!empty($orderByStr)) ? ", " : "") .
 				$this->getSortSQL($orderListItem['property'], $orderListItem['direction']);
 
-			$this->Owner->getDbCriteria()->mergeWith([
+			$this->Owner->getDbCriteria()->mergeWith(array(
 				'order' => $orderByStr
-			]);
+			));
 			return $this->Owner;
 		}
 	}
@@ -96,7 +96,7 @@ class ERestHelperScopes extends CActiveRecordBehavior
 			return $this->Owner;
 		}
 
-		$props = [];
+		$props = array();
 
 		if (!is_array($filter)) {
 			$filterItems = CJSON::decode($filter);
@@ -106,7 +106,7 @@ class ERestHelperScopes extends CActiveRecordBehavior
 		}
 
 		$query = "";
-		$params = [];
+		$params = array();
 		foreach ($filterItems as $filterItem) {
 			if (!is_null($filterItem['property'])) {
 				$c = 0;
@@ -178,9 +178,9 @@ class ERestHelperScopes extends CActiveRecordBehavior
 
 		$query .= ")";
 
-		$this->Owner->getDbCriteria()->mergeWith([
+		$this->Owner->getDbCriteria()->mergeWith(array(
 			'condition' => $query, 'params' => $params
-		]);
+		));
 		return $this->Owner;
 	}
 

@@ -31,20 +31,20 @@ class EActionRestDELETE extends ERestBaseAction
 				throw new CHttpException('405', 'Method Not Allowed');
 				break;
 			case 'CUSTOM':
-				$this->controller->emitRest("req.delete.$id.render", [$param1, $param2]);
+				$this->controller->emitRest("req.delete.$id.render", array($param1, $param2));
 				break;
 			case 'SUBRESOURCES':
 				throw new CHttpException('405', 'Method Not Allowed');
 				break;
 			case 'SUBRESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_DELETE_SUBRESOURCE_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_DELETE_SUBRESOURCE_RENDER, array(
 					$this->handleSubresourceDelete($id, $param1, $param2),
 					$param1,
 					$param2,
-				]);
+				));
 				break;
 			case 'RESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_DELETE_RESOURCE_RENDER, [$this->handleDelete($id)]);
+				$this->controller->emitRest(ERestEvent::REQ_DELETE_RESOURCE_RENDER, array($this->handleDelete($id)));
 				break;
 			default:
 				throw new CHttpException(404, "Resource Not Found");
@@ -66,7 +66,7 @@ class EActionRestDELETE extends ERestBaseAction
 			ERestEvent::MODEL_ATTACH_BEHAVIORS,
 			$this->getModel($id)
 		);
-		return $this->controller->emitRest(ERestEvent::MODEL_DELETE, [$model]);
+		return $this->controller->emitRest(ERestEvent::MODEL_DELETE, array($model));
 	}
 
 	/**
@@ -86,7 +86,7 @@ class EActionRestDELETE extends ERestBaseAction
 			ERestEvent::MODEL_ATTACH_BEHAVIORS,
 			$this->getModel($id)
 		);
-		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_DELETE, [$model, $param1, $param2]);
+		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_DELETE, array($model, $param1, $param2));
 	}
 
 }

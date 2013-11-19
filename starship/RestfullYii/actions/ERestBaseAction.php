@@ -117,11 +117,11 @@ class ERestBaseAction extends CAction
 	 */
 	public function getSubresourceCount($id, $param1, $param2=null)
 	{
-		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_COUNT, [
+		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_COUNT, array(
 			$this->getModel($id),
 				$param1,
 				$param2
-			]
+			)
 		);
 	}
 
@@ -154,7 +154,7 @@ class ERestBaseAction extends CAction
 	 */ 
 	public function getSubresources($id, $param1)
 	{
-		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCES_FIND_ALL, [$this->getModel($id), $param1]);
+		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCES_FIND_ALL, array($this->getModel($id), $param1));
 	}
 
 	/**
@@ -170,6 +170,6 @@ class ERestBaseAction extends CAction
 	 */
 	public function getSubresource($id, $param1, $param2)
 	{
-		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_FIND, [$this->getModel($id), $param1, $param2]);
+		return $this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_FIND, array($this->getModel($id), $param1, $param2));
 	}	
 }

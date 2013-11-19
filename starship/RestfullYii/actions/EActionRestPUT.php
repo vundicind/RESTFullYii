@@ -31,20 +31,20 @@ class EActionRestPUT extends ERestBaseAction
 				throw new CHttpException('405', 'Method Not Allowed');
 				break;
 			case 'CUSTOM':
-				$this->controller->emitRest("req.put.$id.render", [$this->controller->emitRest(ERestEvent::REQ_DATA_READ), $param1, $param2]);
+				$this->controller->emitRest("req.put.$id.render", array($this->controller->emitRest(ERestEvent::REQ_DATA_READ), $param1, $param2));
 				break;
 			case 'SUBRESOURCES':
 				throw new CHttpException('405', 'Method Not Allowed');
 				break;
 			case 'SUBRESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_PUT_SUBRESOURCE_RENDER, [
+				$this->controller->emitRest(ERestEvent::REQ_PUT_SUBRESOURCE_RENDER, array(
 					$this->handlePutSubresource($id, $param1, $param2),
 					$param1,
 					$param2,
-				]);
+				));
 				break;
 			case 'RESOURCE':
-				$this->controller->emitRest(ERestEvent::REQ_PUT_RESOURCE_RENDER, [$this->handlePut($id), $this->getRelations()]);
+				$this->controller->emitRest(ERestEvent::REQ_PUT_RESOURCE_RENDER, array($this->handlePut($id), $this->getRelations()));
 				break;
 			default:
 				throw new CHttpException(404, "Resource Not Found");
@@ -68,8 +68,8 @@ class EActionRestPUT extends ERestBaseAction
 		);
 		$data = $this->controller->emitRest(ERestEvent::REQ_DATA_READ);	
 		$restricted_properties = $this->controller->emitRest(ERestEvent::MODEL_RESTRICTED_PROPERTIES);
-		$model = $this->controller->emitRest(ERestEvent::MODEL_APPLY_PUT_DATA, [$model, $data, $restricted_properties]);
-		return $this->controller->emitRest(ERestEvent::MODEL_SAVE, [$model]);
+		$model = $this->controller->emitRest(ERestEvent::MODEL_APPLY_PUT_DATA, array($model, $data, $restricted_properties));
+		return $this->controller->emitRest(ERestEvent::MODEL_SAVE, array($model));
 	}
 
 	/**
@@ -89,7 +89,7 @@ class EActionRestPUT extends ERestBaseAction
 			ERestEvent::MODEL_ATTACH_BEHAVIORS,
 			$this->getModel($id)
 		);
-		$this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_SAVE, [$model, $subresource_name, $subresource_id]);
+		$this->controller->emitRest(ERestEvent::MODEL_SUBRESOURCE_SAVE, array($model, $subresource_name, $subresource_id));
 		return $model;
 	}
 }

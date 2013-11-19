@@ -28,10 +28,10 @@ class EActionRestPOST extends ERestBaseAction
 	{
     switch ($this->getRequestActionType($id, $param1, $param2, 'post')) {
 			case 'RESOURCES':
-				$this->controller->emitRest(ERestEvent::REQ_POST_RESOURCE_RENDER, [$this->handlePost(), $this->getRelations()]);
+				$this->controller->emitRest(ERestEvent::REQ_POST_RESOURCE_RENDER, array($this->handlePost(), $this->getRelations()));
 				break;
 			case 'CUSTOM':
-				$this->controller->emitRest("req.post.$id.render", [$this->controller->emitRest(ERestEvent::REQ_DATA_READ), $param1, $param2]);
+				$this->controller->emitRest("req.post.$id.render", array($this->controller->emitRest(ERestEvent::REQ_DATA_READ), $param1, $param2));
 				break;
 			case 'SUBRESOURCES':
 				throw new CHttpException('405', 'Method Not Allowed');
@@ -62,7 +62,7 @@ class EActionRestPOST extends ERestBaseAction
 		);
 		$data = $this->controller->emitRest(ERestEvent::REQ_DATA_READ);	
 		$restricted_properties = $this->controller->emitRest(ERestEvent::MODEL_RESTRICTED_PROPERTIES);
-		$model = $this->controller->emitRest(ERestEvent::MODEL_APPLY_POST_DATA, [$model, $data, $restricted_properties]);
-		return $this->controller->emitRest(ERestEvent::MODEL_SAVE, [$model]);
+		$model = $this->controller->emitRest(ERestEvent::MODEL_APPLY_POST_DATA, array($model, $data, $restricted_properties));
+		return $this->controller->emitRest(ERestEvent::MODEL_SAVE, array($model));
 	}
 }

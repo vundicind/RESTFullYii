@@ -19,7 +19,7 @@ class Eventor implements iEventor
 {
 	private $bound_obj;	
 	private $exclusive_event_emit;
-	private $event_register = [];
+	private $event_register = array();
 
 	/**
 	 * construct
@@ -127,7 +127,7 @@ class Eventor implements iEventor
 	 * @param (Callable) (listener) Callback to be called when event is emitted
 	 * @return (String) (listener_signature) The unique ID of the newly created event listener
 	 */
-	public function on($event, Callable $listener)
+	public function on($event,$listener)
 	{
 		$listener_signature = md5( serialize( array($event, microtime() ) ) );
 		$event_register = $this->getEventRegister();
@@ -166,8 +166,11 @@ class Eventor implements iEventor
 		$event_register = $this->getEventRegister();
 		if(isset($event_register[$event])) {
 			foreach($event_register[$event] as $listener) {
-				$callback = $listener['callback']->bindTo( $this->getBoundObj() );
+//				$callback = $listener['callback']->bindTo( $this->getBoundObj() );
+                                $callback = $listener['callback'];
+                                
 				$event_responses[] = call_user_func_array($callback, $params);
+                                
 				if($this->exclusive_event_emit) {
 					return $event_responses[0];
 				}

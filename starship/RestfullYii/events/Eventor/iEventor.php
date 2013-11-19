@@ -27,7 +27,7 @@ interface iEventor
 
 	public function clearEventRegister();
 
-	public function on($event, Callable $listener);
+	public function on($event,$listener);
 
 	public function emit($event, $params=array());
 
