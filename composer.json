@@ -1,0 +1,58 @@
+{
+    "name": "starship/restfullyii",
+    "type": "library",
+    "description": "RESTFull API for your Yii application",
+    "keywords": ["REST", "RESTFull", "Yii", "API"],
+    "homepage": "https://github.com/cccssw/RESTFullYii",
+    "license": "WTFPL",
+    "authors": 
+    [
+	{
+	    "name": "Evan Frohlich",
+	    "email": "evan108108@gmail.com"
+	},
+	{
+	    "name": "goliatone"
+	},
+	{
+	    "name": "ubin"
+	},
+	{
+	    "name": "jlsalvador"
+	},
+	{
+	    "name": "ericmcgill"
+	},
+	{
+	    "name": "stianlik"
+	},
+	{
+	    "name": "kachar"
+	},
+	{
+	    "name": "drLev"
+	},
+	{
+	    "name": "sheershoff"
+	},
+	{
+	    "name": "Arne-S"
+	},
+	{
+	    "name": "amesmoey"
+	},
+	{
+	    "name": "eligundry"
+	},
+	{
+	    "name": "rominawnc"
+	},
+	{
+	    "name": "cccssw"
+	}
+    ],
+    "require": 
+    {
+	"php": ">=5.3.0"
+    }
+}
