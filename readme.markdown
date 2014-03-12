@@ -1,3 +1,22 @@
+# Make it composer-installable
+
+[cccssw's](https://github.com/cccssw/RESTFullYii) 5.3 port is not available via https://packagist.org/.
+
+Instead, this fork contains a `composer.json` file thanks to which one can: 
+
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/vundicind/RESTFullYii"
+        }
+    ]
+
+and
+
+    "require": {
+        "starship/restfullyii": "dev-master"
+    }
+
 # Make it avaliable for PHP 5.3
 
 The original can't support PHP 5.3, and the PHP 5.3 Version offered by the original author lack of many features comparing with the new version(mainly event model)
